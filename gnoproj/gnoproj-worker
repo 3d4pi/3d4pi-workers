@@ -1,0 +1,53 @@
+#!/bin/bash                                                                     
+#    gnoproj-worker, get serve queue contents to network clients using ncat
+#    Copyright (C) 2017 ALSENET.COM  http://www.alsenet.com
+#
+#    Author: Rurik Bugdanov <rurik.bugdanov@alsenet.com>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+ADDR=$(1:-127.0.0.1}
+PORT=${2:-3354}
+
+while true ; do
+  PARAM=($(nc $ADDR $PORT))
+  TIMESTAMP=${PARAM[0]}
+  CAMERADIR=${PARAM[1]}
+  TIFFLIST=${PARAM[2]}
+  OUTPUTDIR=${PARAM[3]}
+  LOGFILE=${PARAM[4]}
+
+  if [ -d "$CAMERADIR" -a -f "$TIFFLIST" -a -d "$OUTPUTDIR" ] ; then
+    /data/bin/gnoprojts \
+      -c "$CAMERADIR" \
+      -i "$TIFFLIST" \
+      -t "$TIMESTAMP" \
+      -o "$OUTPUTDIR"
+
+    EXIT_CODE=$?
+    if [ $EXIT_CODE -eq 0 ] ; then 
+      STATUS=success
+    else
+      STATUS=failure
+    fi
+
+    echo $(date +%Y-%m-%d@%T) $STATUS $TIMESTAMP $EXIT_CODE $(hostname) >> "$LOGFILE"
+    [ $EXIT_CODE -eq 0 ] || sleep 3
+
+  else 
+    sleep 3
+  fi
+
+done
+
