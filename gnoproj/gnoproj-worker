@@ -1,5 +1,5 @@
 #!/bin/bash                                                                     
-#    gnoproj-worker, get serve queue contents to network clients using ncat
+#    gnoproj-worker, get parameters from server and run gnoprojts in a loop
 #    Copyright (C) 2017 ALSENET.COM  http://www.alsenet.com
 #
 #    Author: Rurik Bugdanov <rurik.bugdanov@alsenet.com>
